@@ -1,6 +1,6 @@
 package com.artformgames.plugin.residencelist.ui;
 
-import cc.carm.lib.configuration.Configuration;
+import cc.carm.lib.configuration.core.Configuration;
 import cc.carm.lib.easyplugin.gui.GUI;
 import cc.carm.lib.easyplugin.gui.GUIItem;
 import cc.carm.lib.easyplugin.gui.GUIType;
@@ -8,12 +8,15 @@ import cc.carm.lib.mineconfiguration.bukkit.value.ConfiguredMessage;
 import cc.carm.lib.mineconfiguration.bukkit.value.item.ConfiguredItem;
 import com.artformgames.plugin.residencelist.Main;
 import com.artformgames.plugin.residencelist.conf.PluginConfig;
+import com.artformgames.plugin.residencelist.utils.FoliaUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class SelectIconGUI extends GUI {
@@ -26,7 +29,7 @@ public class SelectIconGUI extends GUI {
     protected final @NotNull BiConsumer<Player, ItemStack> callback;
 
     public SelectIconGUI(@NotNull Player player, @NotNull BiConsumer<Player, ItemStack> callback) {
-        super(GUIType.ONE_BY_NINE, CONFIG.TITLE.parseLine(player));
+        super(GUIType.ONE_BY_NINE, Objects.requireNonNull(CONFIG.TITLE.parse(player)));
         this.player = player;
         this.callback = callback;
 
@@ -45,7 +48,11 @@ public class SelectIconGUI extends GUI {
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
         player.closeInventory();
-        Main.getInstance().getScheduler().run(() -> callback.accept(player, clickedItem));
+        if (FoliaUtil.isFolia) {
+            FoliaUtil.runEntity(player, () -> callback.accept(player, clickedItem));
+        } else {
+            Main.getInstance().getScheduler().run(() -> callback.accept(player, clickedItem));
+        }
     }
 
     public interface CONFIG extends Configuration {

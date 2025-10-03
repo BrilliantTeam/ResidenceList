@@ -15,7 +15,7 @@ import com.artformgames.plugin.residencelist.listener.UserListener;
 import com.artformgames.plugin.residencelist.storage.DataStorage;
 import com.artformgames.plugin.residencelist.storage.yaml.YAMLStorage;
 import com.artformgames.plugin.residencelist.ui.ResidenceListUI;
-import com.artformgames.plugin.residencelist.utils.GHUpdateChecker;
+import com.artformgames.plugin.residencelist.utils.FoliaUtil;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Main extends EasyPlugin implements ResidenceListPlugin {
     private static Main instance;
+
 
     public Main() {
         super(EasyPluginMessageProvider.EN_US);
@@ -34,16 +35,20 @@ public class Main extends EasyPlugin implements ResidenceListPlugin {
     protected MineConfiguration configuration;
     protected DataStorage<?, ?> storage;
 
+
     @Override
     protected void load() {
 
         log("Loading plugin configurations...");
-        this.configuration = new MineConfiguration(this, PluginConfig.class, PluginMessages.class);
+        this.configuration = new MineConfiguration(this);
+        this.configuration.initializeConfig(PluginConfig.class);
+        this.configuration.initializeMessage(PluginMessages.class);
 
     }
 
     @Override
     protected boolean initialize() {
+        FoliaUtil.init(this);
         if (this.storage == null) {
             log("Initialize data storage..."); // Supporting custom storages.
             this.storage = new YAMLStorage(this);
@@ -76,7 +81,7 @@ public class Main extends EasyPlugin implements ResidenceListPlugin {
 
         if (PluginConfig.CHECK_UPDATE.getNotNull()) {
             log("Start to check the plugin versions...");
-            getScheduler().runAsync(GHUpdateChecker.runner(this));
+            // getScheduler().runAsync(GHUpdateChecker.runner(this));
         } else {
             log("Version checker is disabled, skipped.");
         }

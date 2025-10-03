@@ -1,10 +1,11 @@
-package com.artformgames.plugin.residencelist.ui.admin;
+package com.artformgames.plugin.residencelist.ui;
 
-import cc.carm.lib.configuration.Configuration;
+import cc.carm.lib.configuration.core.Configuration;
 import cc.carm.lib.easyplugin.gui.GUIItem;
 import cc.carm.lib.easyplugin.gui.GUIType;
 import cc.carm.lib.easyplugin.gui.paged.AutoPagedGUI;
 import cc.carm.lib.mineconfiguration.bukkit.value.ConfiguredMessage;
+import cc.carm.lib.mineconfiguration.bukkit.value.ConfiguredMessageList;
 import cc.carm.lib.mineconfiguration.bukkit.value.item.ConfiguredItem;
 import cc.carm.lib.mineconfiguration.bukkit.value.item.PreparedItem;
 import com.artformgames.plugin.residencelist.Main;
@@ -14,8 +15,6 @@ import com.artformgames.plugin.residencelist.api.residence.ResidenceRate;
 import com.artformgames.plugin.residencelist.api.user.UserListData;
 import com.artformgames.plugin.residencelist.conf.PluginConfig;
 import com.artformgames.plugin.residencelist.conf.PluginMessages;
-import com.artformgames.plugin.residencelist.ui.ResidenceListUI;
-import com.artformgames.plugin.residencelist.ui.ResidenceManageUI;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -25,26 +24,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class ResidenceAdminUI extends AutoPagedGUI {
 
     public static void open(@NotNull Player player, @Nullable String owner) {
-        UserListData data = ResidenceListAPI.getUserManager().getNullable(player.getUniqueId());
-        if (data == null) {
-            PluginMessages.LOAD_FAILED.sendTo(player);
-            return;
-        }
-        new ResidenceAdminUI(player, data, owner).openGUI(player);
+        new ResidenceAdminUI(player, owner).openGUI(player);
     }
 
-    protected final @NotNull Player viewer;
-    protected final @NotNull UserListData data;
+    protected @NotNull Player viewer;
+
     protected @Nullable String owner;
 
-    public ResidenceAdminUI(@NotNull Player viewer, @NotNull UserListData data, @Nullable String owner) {
+    public ResidenceAdminUI(@NotNull Player viewer, @Nullable String owner) {
         super(GUIType.SIX_BY_NINE, "", 10, 34);
         this.viewer = viewer;
-        this.data = data;
         this.owner = owner;
 
         setPreviousPageSlot(47);
@@ -57,7 +51,7 @@ public class ResidenceAdminUI extends AutoPagedGUI {
 
         initItems();
         loadResidences();
-        this.title = CONFIG.TITLE.parseLine(viewer, 1, getLastPageNumber());
+        this.title = Objects.requireNonNull(CONFIG.TITLE.parse(viewer, 1, getLastPageNumber()));
     }
 
     public @NotNull Player getViewer() {
@@ -65,7 +59,7 @@ public class ResidenceAdminUI extends AutoPagedGUI {
     }
 
     public UserListData getPlayerData() {
-        return this.data;
+        return Main.getInstance().getUserManager().get(getViewer());
     }
 
     public boolean checkOwner(ClaimedResidence residence) {
@@ -120,7 +114,7 @@ public class ResidenceAdminUI extends AutoPagedGUI {
     @Override
     public void onPageChange(int pageNum) {
         PluginConfig.GUI.CLICK_SOUND.playTo(getViewer());
-        updateTitle(CONFIG.TITLE.parseLine(viewer, pageNum, getLastPageNumber()));
+        updateTitle(Objects.requireNonNull(CONFIG.TITLE.parse(viewer, pageNum, getLastPageNumber())));
     }
 
     public void loadResidences() {
@@ -139,11 +133,11 @@ public class ResidenceAdminUI extends AutoPagedGUI {
                 data.countRate(ResidenceRate::recommend), data.countRate(r -> !r.recommend())
         );
         if (data.canTeleport(viewer)) {
-            icon.insert("click-lore", CONFIG.ADDITIONAL_LORE.TELEPORTABLE);
+            icon.insertLore("click-lore", CONFIG.ADDITIONAL_LORE.TELEPORTABLE);
         } else {
-            icon.insert("click-lore", CONFIG.ADDITIONAL_LORE.NORMAL);
+            icon.insertLore("click-lore", CONFIG.ADDITIONAL_LORE.NORMAL);
         }
-        if (!data.getDescription().isEmpty()) icon.insert("description", data.getDescription());
+        if (!data.getDescription().isEmpty()) icon.insertLore("description", data.getDescription());
         if (data.getIconMaterial() != null) {
             icon.handleItem((i, p) -> i.setType(data.getIconMaterial()));
             if (data.getCustomModelData() > 0) {
@@ -160,7 +154,7 @@ public class ResidenceAdminUI extends AutoPagedGUI {
                     if (!data.canTeleport(viewer)) return;
                     Location target = data.getTeleportLocation(viewer);
                     if (target == null) {
-                        PluginMessages.TELEPORT.NO_LOCATION.sendTo(clicker, data.getDisplayName());
+                        PluginMessages.TELEPORT.NO_LOCATION.send(clicker, data.getDisplayName());
                         return;
                     }
                     data.getResidence().tpToResidence(clicker, clicker, clicker.hasPermission("residence.admin"));
@@ -185,11 +179,11 @@ public class ResidenceAdminUI extends AutoPagedGUI {
 
         interface ADDITIONAL_LORE extends Configuration {
 
-            ConfiguredMessage<String> NORMAL = ConfiguredMessage.asString().defaults(
+            ConfiguredMessageList<String> NORMAL = ConfiguredMessageList.asStrings().defaults(
                     "&a ▶ Click &8|&f View information"
             ).build();
 
-            ConfiguredMessage<String> TELEPORTABLE = ConfiguredMessage.asString().defaults(
+            ConfiguredMessageList<String> TELEPORTABLE = ConfiguredMessageList.asStrings().defaults(
                     "&a ▶ LClick &8|&f View information",
                     "&a ▶ RClick &8|&f Teleport to residence"
             ).build();

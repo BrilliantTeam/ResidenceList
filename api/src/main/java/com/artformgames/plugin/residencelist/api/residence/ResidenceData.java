@@ -60,7 +60,7 @@ public interface ResidenceData {
 
     boolean isPublicDisplayed();
 
-    void setPublicDisplayed(boolean enabled);
+    void setPublicDisplayed(boolean publicDisplayed);
 
     Map<UUID, ResidenceRate> getRates();
 

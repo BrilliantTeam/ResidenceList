@@ -20,13 +20,13 @@ public class AdminCommands extends CommandHandler {
 
     @Override
     public Void noArgs(CommandSender sender) {
-        PluginMessages.COMMAND.ADMIN.sendTo(sender);
+        PluginMessages.COMMAND.ADMIN.send(sender);
         return null;
     }
 
     @Override
     public Void noPermission(CommandSender sender) {
-        PluginMessages.COMMAND.NO_PERMISSION.sendTo(sender);
+        PluginMessages.COMMAND.NO_PERMISSION.send(sender);
         return null;
     }
 

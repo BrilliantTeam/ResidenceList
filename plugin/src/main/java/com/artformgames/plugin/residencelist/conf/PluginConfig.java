@@ -1,17 +1,12 @@
 package com.artformgames.plugin.residencelist.conf;
 
-import cc.carm.lib.configuration.Configuration;
-import cc.carm.lib.configuration.annotation.ConfigPath;
-import cc.carm.lib.configuration.annotation.HeaderComments;
-import cc.carm.lib.configuration.value.standard.ConfiguredList;
-import cc.carm.lib.configuration.value.standard.ConfiguredValue;
+import cc.carm.lib.configuration.core.Configuration;
+import cc.carm.lib.configuration.core.annotation.HeaderComment;
+import cc.carm.lib.configuration.core.value.type.ConfiguredList;
+import cc.carm.lib.configuration.core.value.type.ConfiguredValue;
 import cc.carm.lib.mineconfiguration.bukkit.value.ConfiguredSound;
 import cc.carm.lib.mineconfiguration.bukkit.value.item.ConfiguredItem;
-import com.artformgames.plugin.residencelist.ui.ResidenceInfoUI;
-import com.artformgames.plugin.residencelist.ui.ResidenceListUI;
-import com.artformgames.plugin.residencelist.ui.ResidenceManageUI;
-import com.artformgames.plugin.residencelist.ui.SelectIconGUI;
-import com.artformgames.plugin.residencelist.ui.admin.ResidenceAdminUI;
+import com.artformgames.plugin.residencelist.ui.*;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -19,15 +14,13 @@ import org.bukkit.Sound;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-
-@ConfigPath(root = true)
 public interface PluginConfig extends Configuration {
 
     DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     ConfiguredValue<Boolean> DEBUG = ConfiguredValue.of(Boolean.class, false);
 
-    @HeaderComments({
+    @HeaderComment({
             "Statistics Settings",
             "This option is used to help developers count plug-in versions and usage, and it will never affect performance and user experience.",
             "Of course, you can also choose to turn it off here for this plugin,",
@@ -35,7 +28,7 @@ public interface PluginConfig extends Configuration {
     })
     ConfiguredValue<Boolean> METRICS = ConfiguredValue.of(Boolean.class, true);
 
-    @HeaderComments({
+    @HeaderComment({
             "Check update settings",
             "This option is used by the plug-in to determine whether to check for updates.",
             "If you do not want the plug-in to check for updates and prompt you, you can choose to close.",
@@ -46,29 +39,29 @@ public interface PluginConfig extends Configuration {
 
     interface SETTINGS extends Configuration {
 
-        @HeaderComments({
+        @HeaderComment({
                 "Remove info data when failed to load.",
                 "  true = Delete the info data, false = Only notify, keep the info data."
         })
         ConfiguredValue<Boolean> AUTO_REMOVE = ConfiguredValue.of(Boolean.class, true);
 
-        @HeaderComments("Default residence status (Public = true / Private = false)")
+        @HeaderComment("Default residence status (Public = true / Private = false)")
         ConfiguredValue<Boolean> DEFAULT_STATUS = ConfiguredValue.of(Boolean.class, true);
 
-        @HeaderComments("How many letters are displayed per line in the residence description.")
+        @HeaderComment("How many letters are displayed per line in the residence description.")
         ConfiguredValue<Integer> LETTERS_PRE_LINE = ConfiguredValue.of(Integer.class, 35);
 
-        @HeaderComments("The unsuitable icon types for the residence list.")
+        @HeaderComment("The unsuitable icon types for the residence list.")
         ConfiguredList<Material> BLOCKED_ICON_TYPES = ConfiguredList.builderOf(Material.class).fromString()
-                .parse(s -> Objects.requireNonNull(XMaterial.matchXMaterial(s).orElseThrow().parseMaterial()))
-                .serialize(d -> XMaterial.matchXMaterial(d).name())
+                .parseValue(s -> Objects.requireNonNull(XMaterial.matchXMaterial(s).orElseThrow().parseMaterial()))
+                .serializeValue(d -> XMaterial.matchXMaterial(d).name())
                 .defaults(Material.CHEST, Material.CHAIN, Material.REDSTONE).build();
 
     }
 
     interface ICON extends Configuration {
 
-        @HeaderComments("The icon of the residence list.")
+        @HeaderComment("The icon of the residence list.")
         ConfiguredItem INFO = ConfiguredItem.create()
                 .defaultType(Material.GRASS_BLOCK)
                 .defaultName("&7# &f%(name)")
@@ -116,8 +109,7 @@ public interface PluginConfig extends Configuration {
         interface PAGE extends Configuration {
 
             ConfiguredItem PREVIOUS_PAGE = ConfiguredItem.create()
-                    .defaultType(Material.ARROW)
-                    .defaultName("&fPrevious page")
+                    .defaults(Material.ARROW, "&fPrevious page")
                     .defaultLore(
                             " ",
                             "&f  Left click to view the previous page.",
@@ -127,8 +119,7 @@ public interface PluginConfig extends Configuration {
 
 
             ConfiguredItem NO_PREVIOUS_PAGE = ConfiguredItem.create()
-                    .defaultType(Material.ARROW)
-                    .defaultName("&fPrevious page")
+                    .defaults(Material.ARROW, "&fPrevious page")
                     .defaultLore(
                             " ",
                             "&f  There is no previous page.",
@@ -136,8 +127,7 @@ public interface PluginConfig extends Configuration {
                     .build();
 
             ConfiguredItem NEXT_PAGE = ConfiguredItem.create()
-                    .defaultType(Material.ARROW)
-                    .defaultName("&fNext page")
+                    .defaults(Material.ARROW, "&fNext page")
                     .defaultLore(
                             " ",
                             "&f  Left click to view the next page.",
@@ -146,8 +136,7 @@ public interface PluginConfig extends Configuration {
                     ).build();
 
             ConfiguredItem NO_NEXT_PAGE = ConfiguredItem.create()
-                    .defaultType(Material.ARROW)
-                    .defaultName("&fNext page")
+                    .defaults(Material.ARROW, "&fNext page")
                     .defaultLore(
                             " ",
                             "&f  There is no next page.",
@@ -160,9 +149,9 @@ public interface PluginConfig extends Configuration {
 
     interface GUI extends Configuration {
 
-        @HeaderComments("The sound played when the GUI is opened.")
+        @HeaderComment("The sound played when the GUI is opened.")
         ConfiguredSound OPEN_SOUND = ConfiguredSound.of(Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
-        @HeaderComments("The sound played when the player click the buttons in GUI.")
+        @HeaderComment("The sound played when the player click the buttons in GUI.")
         ConfiguredSound CLICK_SOUND = ConfiguredSound.of(Sound.UI_BUTTON_CLICK);
 
         Class<?> LIST = ResidenceListUI.CONFIG.class;

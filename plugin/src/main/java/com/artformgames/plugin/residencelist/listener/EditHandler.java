@@ -1,6 +1,8 @@
 package com.artformgames.plugin.residencelist.listener;
 
 import com.artformgames.plugin.residencelist.Main;
+import com.artformgames.plugin.residencelist.utils.FoliaUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,7 +33,11 @@ public class EditHandler implements Listener {
         String input = event.getMessage();
 
         if (input.isBlank() || input.equalsIgnoreCase("#cancel")) return;
-        Main.getInstance().getScheduler().run(() -> target.accept(player, event.getMessage()));
+        if (FoliaUtil.isFolia) {
+            FoliaUtil.runEntity(player, () -> target.accept(player, event.getMessage()));
+        } else {
+            Main.getInstance().getScheduler().run(() -> target.accept(player, event.getMessage()));
+        }
     }
 
     @EventHandler

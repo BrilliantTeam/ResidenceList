@@ -8,7 +8,6 @@ import com.artformgames.plugin.residencelist.command.UserCommands;
 import com.artformgames.plugin.residencelist.conf.PluginConfig;
 import com.artformgames.plugin.residencelist.conf.PluginMessages;
 import com.artformgames.plugin.residencelist.ui.ResidenceInfoUI;
-import com.artformgames.plugin.residencelist.utils.ResidenceUtils;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,14 +25,14 @@ public class InfoCommand extends SubCommand<UserCommands> {
     @Override
     public Void execute(JavaPlugin plugin, CommandSender sender, String[] args) throws Exception {
         if (!(sender instanceof Player player)) {
-            PluginMessages.COMMAND.ONLY_PLAYER.sendTo(sender);
+            PluginMessages.COMMAND.ONLY_PLAYER.send(sender);
             return null;
         }
         if (args.length < 1) return getParent().noArgs(sender);
 
         ClaimedResidence residence = ResidenceListAPI.getResidence(args[0]);
-        if (residence == null || !ResidenceUtils.viewable(residence, player)) {
-            PluginMessages.COMMAND.NOT_EXISTS.sendTo(sender, args[0]);
+        if (residence == null) {
+            PluginMessages.COMMAND.NOT_EXISTS.send(sender, args[0]);
             return null;
         }
 
@@ -45,12 +44,11 @@ public class InfoCommand extends SubCommand<UserCommands> {
 
     @Override
     public List<String> tabComplete(JavaPlugin plugin, CommandSender sender, String[] args) {
-        if (sender instanceof Player player && args.length == 1) {
+        if (args.length == 1) {
             return SimpleCompleter.objects(
                     args[args.length - 1],
-                    ResidenceListAPI.getResidences().values().stream()
-                            .filter(res -> ResidenceUtils.viewable(res, player))
-                            .map(ClaimedResidence::getName)
+                    ResidenceListAPI.getResidences()
+                            .values().stream().map(ClaimedResidence::getName)
             );
         } else return SimpleCompleter.none();
     }

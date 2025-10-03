@@ -4,9 +4,7 @@ import com.artformgames.plugin.residencelist.ResidenceListAPI;
 import com.artformgames.plugin.residencelist.api.residence.ResidenceData;
 import com.artformgames.plugin.residencelist.api.residence.ResidenceRate;
 import com.artformgames.plugin.residencelist.conf.PluginConfig;
-import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
-import com.bekvon.bukkit.residence.protection.FlagPermissions;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,6 +30,7 @@ public class YAMLResidenceData implements ResidenceData {
     protected @Nullable String aliasName;
     protected @NotNull List<String> description;
 
+    protected boolean publicDisplayed;
     protected final Map<UUID, ResidenceRate> rates;
 
     public YAMLResidenceData(@NotNull File file, @NotNull ClaimedResidence residence) {
@@ -52,6 +51,8 @@ public class YAMLResidenceData implements ResidenceData {
 
         this.aliasName = conf.getString("nickname", residence.getName());
         this.description = conf.getStringList("description");
+
+        this.publicDisplayed = conf.getBoolean("public", PluginConfig.SETTINGS.DEFAULT_STATUS.getNotNull());
         this.rates = loadRatesFrom(conf.getConfigurationSection("rates"));
     }
 
@@ -108,17 +109,13 @@ public class YAMLResidenceData implements ResidenceData {
         setDescription(List.of(descriptions));
     }
 
-    @Override
     public boolean isPublicDisplayed() {
-        return !getResidence().getPermissions().has(Flags.hidden, !PluginConfig.SETTINGS.DEFAULT_STATUS.resolve());
+        return publicDisplayed;
     }
 
-    @Override
-    public void setPublicDisplayed(boolean enabled) {
-        getResidence().getPermissions().setFlag(
-                Flags.hidden.name(),
-                enabled ? FlagPermissions.FlagState.FALSE : FlagPermissions.FlagState.TRUE
-        );
+    public void setPublicDisplayed(boolean publicDisplayed) {
+        this.publicDisplayed = publicDisplayed;
+        this.conf.set("public", publicDisplayed);
     }
 
     public Map<UUID, ResidenceRate> getRates() {

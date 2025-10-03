@@ -18,12 +18,12 @@ public class ReloadCommand extends SubCommand<AdminCommands> {
     public Void execute(JavaPlugin plugin, CommandSender sender, String[] args) throws Exception {
 
         try {
-            PluginMessages.RELOAD.START.sendTo(sender);
+            PluginMessages.RELOAD.START.send(sender);
             long s1 = System.currentTimeMillis();
             Main.getInstance().getConfiguration().reload();
-            PluginMessages.RELOAD.SUCCESS.sendTo(sender, System.currentTimeMillis() - s1);
+            PluginMessages.RELOAD.SUCCESS.send(sender, System.currentTimeMillis() - s1);
         } catch (Exception e) {
-            PluginMessages.RELOAD.FAILED.sendTo(sender);
+            PluginMessages.RELOAD.FAILED.send(sender);
             e.printStackTrace();
         }
 

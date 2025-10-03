@@ -53,14 +53,9 @@ public class YAMLStorage extends UserDataManager<UUID, YAMLUserData>
 
     @Override
     public void shutdown() {
-        saveAll();
+        saveAllUsers();
         saveAllResidences();
         super.shutdown();
-    }
-
-    @Override
-    public @NotNull Map<UUID, YAMLUserData> cache() {
-        return this.dataCache;
     }
 
     protected File initializeFolder(File parent, String folderName) {
@@ -94,7 +89,7 @@ public class YAMLStorage extends UserDataManager<UUID, YAMLUserData>
 
     @Override
     protected void saveData(@NotNull YAMLUserData data) throws Exception {
-        File userFile = new File(this.userDataFolder, data.key() + ".yaml");
+        File userFile = new File(this.userDataFolder, data.getKey() + ".yaml");
         if (data.isEmpty() && userFile.exists()) {
             userFile.delete(); // Delete empty data files.
             return;
@@ -175,7 +170,7 @@ public class YAMLStorage extends UserDataManager<UUID, YAMLUserData>
     }
 
     @Override
-    public @NotNull YAMLResidenceData loadResidence(String residenceName) throws Exception {
+    public YAMLResidenceData loadResidence(String residenceName) throws Exception {
         ClaimedResidence residence = Residence.getInstance().getResidenceManager().getByName(residenceName);
         if (residence == null) throw new Exception("Residence not found: " + residenceName);
         return new YAMLResidenceData(new File(this.residenceDataFolder, residence.getName() + ".yaml"), residence);
@@ -236,5 +231,10 @@ public class YAMLStorage extends UserDataManager<UUID, YAMLUserData>
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void saveAllUsers() {
+        super.saveAll(); // Use saveAll() provided by UserDataManager.
     }
 }
